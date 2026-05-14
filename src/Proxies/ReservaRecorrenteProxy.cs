@@ -1,5 +1,7 @@
+using System;
 using Study_Classes_Booking_System.src.Repositories;
 using Study_Classes_Booking_System.src.Models;
+using Study_Classes_Booking_System.src.Services;
 
 
 namespace Study_Classes_Booking_System.src.Proxies

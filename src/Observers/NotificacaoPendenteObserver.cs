@@ -1,7 +1,7 @@
 using System;
-using Study_Booking_Classes_System.src.Models;
+using Study_Classes_Booking_System.src.Models;
 
-namespace Study_Booking_Classes_System.src.Observers
+namespace Study_Classes_Booking_System.src.Observers
 {
     public class NotificacaoPendenteObserver : IReservaObserver
     {

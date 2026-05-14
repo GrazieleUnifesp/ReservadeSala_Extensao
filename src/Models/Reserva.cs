@@ -12,7 +12,7 @@ namespace Study_Classes_Booking_System.src.Models
 
     public class Reserva
     {
-        public int Id { get; set; }
+        public string Id { get; set; } = "";
         public Sala Sala { get; set; } // Aqui usamos a classe mãe (Polimorfismo)
         public Usuario Usuario { get; set; }
         public DateTime Horario { get; set; }
