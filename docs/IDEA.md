@@ -1,6 +1,6 @@
 # Diagramas de Classes – Sistema de Reserva de Salas
 
-> Padrões aplicados: **Factory Method · Singleton · Strategy · Observer · Decorator**
+> Padrões aplicados: **Factory Method · Singleton · Strategy · Observer · Decorator · Proxy**
 
 ---
 
@@ -183,6 +183,9 @@ classDiagram
         +buscarPorHorario(dt: LocalDateTime) List~Reserva~
         +listarSalas() List~Sala~
         +listarTodas() List~Reserva~
+        +consultarFrequenciaUsuario(matricula: int) int
+        +listarHistorico(matricula: int) List~Reserva~
+        +listarFrequenciaTodosUsuarios() Dictionary~String, int~
     }
 
     class Reserva {
@@ -210,7 +213,7 @@ classDiagram
 
 ---
 
-## 4. Padrão Strategy – Política de Reserva (RF-03)
+## 4. Padrão Strategy – Política de Reserva
 
 ```mermaid
 classDiagram
@@ -256,7 +259,7 @@ classDiagram
 
 ---
 
-## 5. Padrão Observer – Notificações (RF-04)
+## 5. Padrão Observer – Notificações
 
 ```mermaid
 classDiagram
@@ -297,6 +300,11 @@ classDiagram
         %% Grava log de auditoria
     }
 
+    class NotificacaoPendenteObserver {
+        +update(evento: String, reserva: Reserva) void
+        %% Avisa sobre conflito de reserva recorrente
+    }
+
     class SistemaReservas {
         -eventManager: EventManager
         -repository: ReservaRepository
@@ -309,15 +317,65 @@ classDiagram
     NotificacaoPushObserver ..|> ReservaObserver : implementa
     RelatorioServicoObserver ..|> ReservaObserver : implementa
     LogAuditoriaObserver ..|> ReservaObserver : implementa
+    NotificacaoPendenteObserver ..|> ReservaObserver : implementa
     EventManager "1" o-- "0..*" ReservaObserver : notifica
     SistemaReservas --> EventManager : dispara eventos
 ```
 
 ---
 
+## 6. Padrão Proxy – Reservas Recorrentes (Extensão)
+
+```mermaid
+classDiagram
+    direction TB
+
+    class ReservaRecorrenteProxy {
+        -repo: ReservaRepository
+        -validador: ValidadorReserva
+        +ReservaRecorrenteProxy(validador: ValidadorReserva)
+        +criarRecorrente(origem: Reserva, semanas: int) void
+    }
+
+    class ReservaRepository {
+        <<Singleton>>
+        +getInstance() ReservaRepository
+        +salvar(r: Reserva) void
+        +consultarFrequenciaUsuario(matricula: int) int
+        +listarHistorico(matricula: int) List~Reserva~
+    }
+
+    class ValidadorReserva {
+        -politica: PoliticaReserva
+        +validar(nova: Reserva) boolean
+    }
+
+    class EventManager {
+        +notify(evento: String, r: Reserva) void
+    }
+
+    class NotificacaoPendenteObserver {
+        +update(evento: String, reserva: Reserva) void
+        %% Disparado quando semana fica PENDENTE
+    }
+
+    class Reserva {
+        -id: String
+        -horario: LocalDateTime
+        -status: StatusReserva
+        +confirmar() void
+    }
+
+    ReservaRecorrenteProxy --> ReservaRepository : usa Singleton
+    ReservaRecorrenteProxy --> ValidadorReserva : valida cada semana
+    ReservaRecorrenteProxy --> EventManager : dispara ReservaCriada ou ReservaPendente
+    NotificacaoPendenteObserver ..> EventManager : escuta ReservaPendente
+    ReservaRecorrenteProxy ..> Reserva : cria por semana
+```
+
 ---
 
-## 6. Integração Completa – Fluxo Principal
+## 7. Integração Completa – Fluxo Principal
 
 ```mermaid
 classDiagram
@@ -368,6 +426,9 @@ classDiagram
         +update(evento, reserva) void
     }
 
+    class ReservaRecorrenteProxy {
+        +criarRecorrente(origem: Reserva, semanas: int) void
+    }
 
     SistemaReservas --> SalaFactory : cria salas
     SistemaReservas --> ReservaRepository : persiste
@@ -375,4 +436,7 @@ classDiagram
     SistemaReservas --> EventManager : dispara eventos
     ValidadorReserva o--> PoliticaReserva : estratégia
     EventManager o--> ReservaObserver : notifica
+    ReservaRecorrenteProxy --> ReservaRepository : persiste recorrências
+    ReservaRecorrenteProxy --> ValidadorReserva : valida por semana
+    ReservaRecorrenteProxy --> EventManager : dispara eventos
 ```
