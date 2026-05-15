@@ -7,6 +7,7 @@ using Study_Classes_Booking_System.src.Services;
 
 namespace Study_Classes_Booking_System.src.Repositories
 {
+feature/historico-e-proxy
     public class ReservaRepositorySingleton
     {
         private static ReservaRepositorySingleton _instance;
