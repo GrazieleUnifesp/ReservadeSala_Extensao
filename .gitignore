@@ -95,3 +95,9 @@ docker-compose.override.yml
 # Local secrets
 secrets.json
 appsettings.Development.json
+
+# Solution files
+*.sln
+
+# User-specific project files
+*.csproj.user
